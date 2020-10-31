@@ -24,21 +24,25 @@ export class WSClientConn extends WSConn {
   }
 
   private async onopen(e: Event) {
-    await this.emit("open", undefined)
+    this.emit("open", undefined)
+      .catch(console.error)
   }
 
   private async onclose(e: CloseEvent) {
-    await this.emit("close",
+    this.emit("close",
       new ConnectionCloseError(e.reason))
+      .catch(console.error)
   }
 
   private async onerror(e: Event) {
-    await this.emit("error", new Error())
+    this.emit("error", new Error())
+      .catch(console.error)
   }
 
   private async onmessage(e: MessageEvent) {
     const data = JSON.parse(e.data)
-    await this.emit("message", data)
+    this.emit("message", data)
+      .catch(console.error)
   }
 
   private async _waitready() {

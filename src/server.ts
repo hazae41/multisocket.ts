@@ -50,12 +50,12 @@ export class WSServer extends EventEmitter<WSServerEvents> {
 
   private async listen(options: HTTPOptions) {
     for await (const req of serve(options))
-      this.handle(req)
+      this.handle(req).catch(console.error)
   }
 
   private async listenTLS(options: HTTPSOptions) {
     for await (const req of serveTLS(options))
-      this.handle(req)
+      this.handle(req).catch(console.error)
   }
 
   private async handle(req: ServerRequest) {
@@ -83,6 +83,7 @@ export class WSServerConn extends WSConn {
     super()
 
     this._listen()
+      .catch(console.error)
   }
 
   get closed() { return this.socket.isClosed }
@@ -105,6 +106,7 @@ export class WSServerConn extends WSConn {
   private async _listen() {
     for await (const e of this.socket) {
       this._handle(e)
+        .catch(console.error)
     }
 
     await this.emit("close",
