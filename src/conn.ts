@@ -60,15 +60,6 @@ export abstract class WSConn extends EventEmitter<WSConnectionEvents> {
   abstract async send(msg: WSMessage): Promise<void>
   abstract async close(reason?: string): Promise<void>
 
-  async catch(e: unknown) {
-    console.error(e)
-
-    if (e instanceof CloseError && !this.closed)
-      await this.close(e.reason)
-    else if (e instanceof Error && !this.closed)
-      await this.close(e.message)
-  }
-
   private async onwsopen(msg: WSOpenMessage) {
     if (this.channels.has(msg.uuid))
       throw new Error("UUID already exists")
@@ -80,11 +71,7 @@ export abstract class WSConn extends EventEmitter<WSConnectionEvents> {
     channel.once(["close"], () =>
       this.channels.delete(uuid))
 
-    try {
-      await this.paths.emit(path, { channel, data })
-    } catch (e: unknown) {
-      await channel.catch(e)
-    }
+    await this.paths.emit(path, { channel, data })
   }
 
   private async onwsmessage(msg: WSMessage) {
@@ -97,28 +84,16 @@ export abstract class WSConn extends EventEmitter<WSConnectionEvents> {
     if (!channel) throw new Error("Invalid UUID")
 
     if (msg.type === undefined) {
-      try {
-        await channel.emit("message", msg.data)
-      } catch (e: unknown) {
-        await channel.catch(e)
-      }
+      await channel.emit("message", msg.data)
     }
 
     if (msg.type === "close") {
-      try {
-        await channel.emit("close", msg.data)
-      } catch (e: unknown) {
-        await this.catch(e)
-      }
+      await channel.emit("close", msg.data)
     }
 
     if (msg.type === "error") {
-      try {
-        await channel.emit("close",
-          new ChannelCloseError(msg.reason))
-      } catch (e: unknown) {
-        await this.catch(e)
-      }
+      await channel.emit("close",
+        new ChannelCloseError(msg.reason))
     }
   }
 

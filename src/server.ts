@@ -74,12 +74,7 @@ export class WSServer extends EventEmitter<WSServerEvents> {
     }
 
     const conn = new WSServerConn(socket)
-
-    try {
-      await this.emit("accept", conn)
-    } catch (e: unknown) {
-      await conn.catch(e)
-    }
+    await this.emit("accept", conn)
   }
 }
 
@@ -88,7 +83,6 @@ export class WSServerConn extends WSConn {
     super()
 
     this._listen()
-      .catch(e => this.catch(e))
   }
 
   get closed() { return this.socket.isClosed }
@@ -111,7 +105,6 @@ export class WSServerConn extends WSConn {
   private async _listen() {
     for await (const e of this.socket) {
       this._handle(e)
-        .catch(e => this.catch(e))
     }
 
     await this.emit("close",

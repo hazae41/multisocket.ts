@@ -41,13 +41,9 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
    * @throws unknown if not an Error
    */
   async catch(e: unknown) {
-    if (e instanceof CloseError) {
-      console.error(e)
-    } else if (e instanceof Error) {
+    if (e instanceof Error && !this.closed) {
       await this.throw(e.message)
-    } else {
-      console.error(e)
-    }
+    } else throw e
   }
 
   /**
