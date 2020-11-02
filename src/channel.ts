@@ -104,7 +104,7 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
    * Wait for a close message.
    * Throws if it's closed with an error, timed out, or if we received a normal message.
    */
-  async final<T = unknown>(delay = 0) {
+  async final(delay = 0) {
     const close = this.wait(["close"])
     const message = this.error(["message"])
       .catch(() => new Error("Unexpected message"))
@@ -115,6 +115,7 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
 
     if (result instanceof CloseError)
       throw result
-    return result as T
+
+    return result
   }
 }

@@ -151,8 +151,8 @@ export abstract class WSConn extends EventEmitter<WSConnectionEvents> {
    * @param delay Timeout delay
    * @returns Data received
    */
-  async request<T>(path: string, data?: unknown, delay = 1000) {
+  async request(path: string, data?: unknown, delay = 1000) {
     const channel = await this.open(path, data)
-    return await channel.final<T>(delay)
+    return await channel.final(delay)
   }
 }

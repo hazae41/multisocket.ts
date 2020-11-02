@@ -2,6 +2,18 @@
 
 > WebSocket but with channels.
 
+```typescript
+const channel = await conn.open("/test", "Hello world")
+
+console.log(await channel.read())
+
+await channel.send(data)
+
+const data2 = await channel.read()
+
+await channel.close(data2)
+```
+
 ### Server
 
 Use Deno's WebSocket server on HTTP or HTTPS.
@@ -114,3 +126,5 @@ try {
   await channel.catch(e)
 }
 ```
+
+Check `test/events.ts` for more examples

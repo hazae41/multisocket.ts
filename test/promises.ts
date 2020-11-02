@@ -1,6 +1,5 @@
-import { WSServer } from "./src/server.ts"
-import { WSClientConn } from "./src/client.ts"
-import { Timeout } from "./deps/timeout.ts"
+import { WSClientConn, WSServer } from "../mod.ts"
+import { Timeout } from "../deps/timeout.ts"
 
 // Open a WS server on HTTP
 const server = new WSServer({ port: 8443 })
