@@ -55,12 +55,9 @@ export abstract class WSConn<E extends WSConnectionEvents = WSConnectionEvents> 
       throw new Error("UUID already exists")
 
     const { uuid, path, data } = msg;
-    const channel = new WSChannel(this, uuid)
-    this.channels.set(uuid, channel)
+    const channel = this.create(uuid)
 
-    channel.once(["close"], () =>
-      this.channels.delete(uuid))
-
+    await channel.emit("open", undefined)
     await this.paths.emit(path, { channel, data })
   }
 
@@ -113,24 +110,29 @@ export abstract class WSConn<E extends WSConnectionEvents = WSConnectionEvents> 
   }
 
   /**
-   * Open a channel
-   * @param path Path
-   * @param data Data to send
+   * Create a channel
+   * @returns a new channel
    */
-  async open(path: string, data?: unknown) {
-    const uuid = this.genUUID()
+  create(uuid = this.genUUID()): WSChannel {
     const channel = new WSChannel(this, uuid)
 
-    const message: WSMessage =
-      { uuid, type: "open", path, data }
-
-    await this.send(message)
-
-    this.channels.set(uuid, channel)
+    channel.once(["open"], () =>
+      this.channels.set(uuid, channel))
 
     channel.once(["close"], () =>
       this.channels.delete(uuid))
 
+    return channel
+  }
+
+  /**
+   * Create and open a channel
+   * @param path Path
+   * @param data Data to send
+   */
+  async open(path: string, data?: unknown) {
+    const channel = this.create()
+    await channel.open(path, data)
     return channel
   }
 

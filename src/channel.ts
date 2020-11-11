@@ -11,12 +11,13 @@ import {
 } from "./errors.ts";
 
 export interface WSChannelEvents {
+  open: undefined
   close: unknown
   message: unknown
 }
 
 export class WSChannel extends EventEmitter<WSChannelEvents> {
-  private _closed = false
+  state: "open" | "closed" = "closed"
 
   /**
    * Create a new unopened channel
@@ -30,10 +31,12 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
     super()
 
     conn.once(["close"], this.reemit("close"))
-    this.once(["close"], () => this._closed = true)
+
+    this.once(["open"], () => this.state = "open")
+    this.once(["close"], () => this.state = "closed")
   }
 
-  get closed() { return this._closed }
+  get closed() { return this.state === "closed" }
 
   /**
    * Redirects errors to the remote
@@ -46,15 +49,26 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
   }
 
   /**
+   * Open the channel with some data (or not)
+   * @param path Path
+   * @param data Data to send
+   */
+  async open(path: string, data?: unknown) {
+    const { conn, uuid } = this;
+    await conn.send(
+      { uuid, type: "open", path, data })
+    await this.emit("open", undefined)
+  }
+
+  /**
    * Close the channel with some data (or not)
    * @param data Data to send
    */
   async close(data?: unknown) {
     const { conn, uuid } = this;
+    await conn.send(
+      { uuid, type: "close", data })
     await this.emit("close", undefined)
-    const message: WSMessage =
-      { uuid, type: "close", data }
-    await conn.send(message)
   }
 
   /**
@@ -63,11 +77,10 @@ export class WSChannel extends EventEmitter<WSChannelEvents> {
    */
   async throw(reason?: string) {
     const { conn, uuid } = this;
+    await conn.send(
+      { uuid, type: "error", reason })
     await this.emit("close",
       new ChannelCloseError(reason))
-    const message: WSMessage =
-      { uuid, type: "error", reason }
-    await conn.send(message)
   }
 
   /**
