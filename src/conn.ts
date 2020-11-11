@@ -4,17 +4,11 @@ import { Timeout } from "../deps/timeout.ts";
 
 import * as UUIDs from "../deps/uuid.ts";
 
-import {
-  WebSocketPingEvent,
-  WebSocketPongEvent
-} from "../deps/ws.ts";
-
 import { WSChannel } from "./channel.ts";
 
 import {
   ChannelCloseError,
   CloseError,
-  ConnectionCloseError
 } from "./errors.ts";
 
 import {
@@ -29,15 +23,11 @@ export interface Message<T = unknown> {
 }
 
 export interface WSConnectionEvents {
-  open: undefined
-  error: Error
-  ping: WebSocketPingEvent
-  pong: WebSocketPongEvent
   message: WSMessage
   close: CloseError
 }
 
-export abstract class WSConn extends EventEmitter<WSConnectionEvents> {
+export abstract class WSConn<E extends WSConnectionEvents = WSConnectionEvents> extends EventEmitter<E> {
   readonly channels = new Map<UUID, WSChannel>()
 
   readonly paths = new EventEmitter<{

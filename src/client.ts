@@ -1,10 +1,15 @@
 import { Abort } from "../deps/abortable.ts";
 
-import { WSConn } from "./conn.ts";
+import { WSConn, WSConnectionEvents } from "./conn.ts";
 import { ConnectionCloseError } from "./errors.ts";
 import { WSMessage } from "./types.ts";
 
-export class WSClientConn extends WSConn {
+export interface WSClientConnEvents extends WSConnectionEvents {
+  open: undefined
+  error: Error
+}
+
+export class WSClientConn extends WSConn<WSClientConnEvents> {
   readonly waitready = this._waitready().catch()
   readonly socket = new WebSocket(this.url)
 

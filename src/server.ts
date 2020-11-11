@@ -12,12 +12,14 @@ import {
   isWebSocketPingEvent,
   isWebSocketPongEvent,
   WebSocket,
-  WebSocketEvent
+  WebSocketEvent,
+  WebSocketPingEvent,
+  WebSocketPongEvent
 } from "../deps/ws.ts";
 
 import { EventEmitter } from "../deps/mutevents.ts";
 
-import { WSConn } from "./conn.ts";
+import { WSConn, WSConnectionEvents } from "./conn.ts";
 import { WSMessage } from "./types.ts";
 import { ConnectionCloseError } from "./errors.ts";
 
@@ -78,7 +80,12 @@ export class WSServer extends EventEmitter<WSServerEvents> {
   }
 }
 
-export class WSServerConn extends WSConn {
+export interface WSServerConnEvents extends WSConnectionEvents {
+  ping: WebSocketPingEvent
+  pong: WebSocketPongEvent
+}
+
+export class WSServerConn extends WSConn<WSServerConnEvents> {
   constructor(readonly socket: WebSocket) {
     super()
 
