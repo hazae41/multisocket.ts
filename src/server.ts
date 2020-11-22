@@ -51,13 +51,27 @@ export class WSServer extends EventEmitter<WSServerEvents> {
   }
 
   private async listen(options: HTTPOptions) {
-    for await (const req of serve(options))
-      this.handle(req).catch(console.error)
+    while (true) {
+      try {
+        for await (const req of serve(options))
+          this.handle(req).catch(console.error)
+        return
+      } catch (e: unknown) {
+        console.error(e)
+      }
+    }
   }
 
   private async listenTLS(options: HTTPSOptions) {
-    for await (const req of serveTLS(options))
-      this.handle(req).catch(console.error)
+    while (true) {
+      try {
+        for await (const req of serveTLS(options))
+          this.handle(req).catch(console.error)
+        return
+      } catch (e: unknown) {
+        console.error(e)
+      }
+    }
   }
 
   private async handle(req: ServerRequest) {
