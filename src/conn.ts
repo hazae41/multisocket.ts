@@ -47,8 +47,8 @@ export abstract class WSConn<E extends WSConnectionEvents = WSConnectionEvents> 
 
   abstract get closed(): boolean;
 
-  abstract async send(msg: WSMessage): Promise<void>
-  abstract async close(reason?: string): Promise<void>
+  abstract send(msg: WSMessage): Promise<void>
+  abstract close(reason?: string): Promise<void>
 
   private async onwsopen(msg: WSOpenMessage) {
     if (this.channels.has(msg.uuid))

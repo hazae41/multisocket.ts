@@ -4,7 +4,7 @@ import { WSClientConn } from "../src/client.ts"
 const server = new WSServer({ port: 8443 })
 
 // When a connection is accepted
-server.on(["accept"], async (conn) => {
+server.on(["accept"], (conn) => {
 
   // When a channel is opened on "/test"
   const offtest = conn.paths.on(["/test"],
